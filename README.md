@@ -1,93 +1,271 @@
 # Teslyar Amazon Dashboard
 
-Локальний dashboard для аналізу Amazon P&L за березень і квітень 2026 року. Основний фокус: швидко показати, як змінився портфель, у яких країнах просів прибуток і які SKU потребують уваги.
+Локальний аналітичний дашборд для Amazon EU P&L-звітів за березень і квітень 2026 року. Основна ціль — допомогти sales-менеджеру швидко зрозуміти, що змінилось у портфелі, де просів прибуток і які SKU потрібно перевірити першими.
 
-## Стек
+## Чому Такий Стек
 
-- **Next.js + TypeScript** — щоб зробити не прототипну таблицю, а зручний локальний web dashboard.
-- **Recharts** — інтерактивні графіки без зайвої складності.
-- **Python + pandas** — для CSV ingestion, нормалізації чисел і розрахунку агрегатів. Це природний вибір для дата-аналітики й добре масштабується на інші Amazon-звіти.
+**Python + pandas** використовується для підготовки даних, бо вхідні файли — це реальні CSV-звіти з різними форматами: `;` як роздільник у P&L, кома як десятковий розділювач, NBSP у числах, різні назви файлів і окремі PPC-звіти. pandas добре підходить саме для такого очищення, нормалізації та агрегації.
 
-## Що реалізовано
+**Next.js + TypeScript** використовується для інтерфейсу, бо результат має виглядати як невеликий продукт, а не як технічний notebook. Це також дає зручний локальний запуск і зрозумілу структуру коду.
 
-- Portfolio overview: Sales, Net profit, Margin, Units із порівнянням April vs March.
-- Country breakdown: топ країн за Sales, Net profit, Margin, Units або PPC spend.
-- Product view: пошук за SKU/ASIN/назвою, сортування за Sales, Net profit, Margin change або Profit change.
-- AI-фіча: Groq business summary + 3-5 SKU на увагу. pandas спочатку знаходить факти й ризики в даних, а модель інтерпретує вже пораховані агрегати й сама обирає attention SKU з підготовлених кандидатів.
-- Ask about data: Q&A по всіх підготовлених pandas-агрегатах через Groq. Модель не отримує сирі CSV, а відповідає на основі portfolio/country/product даних після обробки.
+**Groq** використовується для AI-шару: модель формує executive insight, сама обирає SKU на увагу з підготовлених кандидатів і відповідає на питання по оброблених даних.
 
-## Обробка даних
+## Product Thinking
 
-Python-скрипт `scripts/prepare_data.py` читає файли з `data/raw`, підтримує `;` у P&L файлах, CSV у лапках, NBSP у числах, європейську нотацію `1 234,56`, різний регістр і непослідовні назви PPC-файлів. P&L агрегати беруться з marketplace-level рядків, щоб не подвоювати totals через продуктові рядки.
+Головний екран побудований навколо питань, які sales-менеджер поставить першими:
 
-Скрипт генерує два однакові JSON-файли:
+- як змінились Sales;
+- що сталося з Net profit;
+- чи просіла Margin;
+- чи змінились Units;
+- у яких країнах або товарах проблема найбільша.
+
+Тому зверху показані ключові KPI, нижче — розріз по країнах, список SKU на увагу та таблиця продуктів із пошуком і сортуванням.
+
+AI-фіча зроблена не як “чат заради чату”. Основна користь AI тут:
+
+- **Executive insight** — коротке пояснення, що змінилось за місяць;
+- **SKU на увагу** — Groq сам обирає 3-5 SKU з підготовлених risk candidates;
+- **Запитайте AI-аналітика** — Q&A по агрегованих даних після pandas-обробки.
+
+Модель не отримує сирі CSV і не рахує метрики самостійно. Python готує числа, Groq інтерпретує вже пораховані факти.
+
+## Обробка Даних
+
+Сирі файли лежать у:
+
+```text
+data/raw
+```
+
+Скрипт підготовки:
+
+```text
+scripts/prepare_data.py
+```
+
+Він обробляє:
+
+- P&L CSV із `;` як delimiter;
+- PPC CSV з окремою структурою;
+- європейські числа типу `1 234,56`;
+- NBSP у числах;
+- різний регістр і непослідовні назви файлів;
+- marketplace alias `Amazon.com.be -> BE`;
+- country-level totals окремо від product rows;
+- агрегацію товарів по `ASIN + SKU`.
+
+P&L totals беруться з marketplace-level рядків, щоб не подвоювати значення через продуктові рядки. PPC використовується як рекламний контекст по країнах і портфелю. PPC не зводиться з P&L на SKU-рівні, бо для цього потрібне окреме підтверджене правило атрибуції.
+
+Скрипт генерує:
 
 ```text
 data/processed/dashboard.json
 public/data/dashboard.json
 ```
 
-Next.js читає `public/data/dashboard.json`, щоб деплой на Vercel не залежав від локального Python-кроку під час build.
+Next.js читає готовий JSON із `public/data/dashboard.json`.
 
-## Запуск
+## AI Layer
 
-```bash
-npm install
-npm run prepare:data
-npm run dev
-```
-
-Після запуску відкрити:
-
-```bash
-http://localhost:3000
-```
-
-## Groq AI
-
-Для локального AI summary створити `.env.local`:
+Змінні середовища для Groq:
 
 ```bash
 GROQ_API_KEY=your_groq_api_key_here
-GROQ_MODEL=llama-3.3-70b-versatile
-```
-
-`GROQ_MODEL` опційний. За замовчуванням використовується `llama-3.3-70b-versatile`.
-`GROQ_FALLBACK_MODEL` опційний. Якщо primary-модель недоступна, API автоматично пробує fallback-модель, за замовчуванням `openai/gpt-oss-120b`.
-`GROQ_SECONDARY_FALLBACK_MODEL` опційний. Якщо перші дві моделі недоступні або вперлись у ліміти, API пробує `meta-llama/llama-4-scout-17b-16e-instruct`.
-
-Без `GROQ_API_KEY` AI-блок і Q&A покажуть помилку інтеграції. Deterministic fallback навмисно не використовується, бо фіча має демонструвати реальну AI-інтеграцію.
-
-## Деплой на Vercel
-
-1. Локально оновити JSON:
-
-```bash
-npm run prepare:data
-```
-
-2. Закомітити `public/data/dashboard.json` разом із кодом.
-3. Імпортувати репозиторій у Vercel як Next.js project.
-4. Build Command:
-
-```bash
-npm run build
-```
-
-5. У Vercel Environment Variables додати:
-
-```bash
-GROQ_API_KEY=...
 GROQ_MODEL=llama-3.3-70b-versatile
 GROQ_FALLBACK_MODEL=openai/gpt-oss-120b
 GROQ_SECONDARY_FALLBACK_MODEL=meta-llama/llama-4-scout-17b-16e-instruct
 ```
 
-Python/pandas потрібні тільки для локальної підготовки нового JSON. Сам Vercel-деплой працює з готовим `public/data/dashboard.json`.
+Порядок моделей:
 
-## Що б додав далі
+1. `GROQ_MODEL`
+2. `GROQ_FALLBACK_MODEL`
+3. `GROQ_SECONDARY_FALLBACK_MODEL`
 
-- OpenAI API поверх уже підготовленого structured context, щоб summary був природнішим, але без ризику галюцинацій у цифрах.
-- Імпорт нових місяців через upload або папку `data/raw`.
-- Зведення PPC з P&L на рівні SKU, якщо є стабільний ключ і підтверджена бізнес-логіка атрибуції.
-- Експорт executive summary у PDF/Google Sheets для щомісячного звіту.
+Deterministic fallback для AI навмисно не використовується. Якщо всі Groq-моделі недоступні або впираються в ліміти, дашборд показує помилку AI-інтеграції. Це зроблено свідомо, бо тестове має демонструвати реальну AI-інтеграцію.
+
+Для Q&A використовується question-specific context. Наприклад, якщо питання про найкращі продажі, у модель передаються тільки top sales / top units зрізи. Якщо питання про просідання, передаються country data та biggest drops. Це зменшує розмір запиту і допомагає не впиратися в token-per-minute ліміти.
+
+Debug endpoint для перевірки context:
+
+```text
+/api/debug/qa-context
+/api/debug/qa-context?question=Який SKU продавався найкраще у квітні?
+```
+
+## Повний Запуск З Нуля Для Windows
+
+### 1. Встановити Git
+
+У PowerShell виконати:
+
+```powershell
+winget install --id Git.Git -e --source winget
+```
+
+Після встановлення перевірити в PowerShell:
+
+```powershell
+git --version
+```
+
+Якщо `winget` недоступний, Git можна встановити вручну:
+
+```text
+https://git-scm.com/download/win
+```
+
+### 2. Встановити Node.js
+
+У PowerShell виконати:
+
+```powershell
+winget install --id OpenJS.NodeJS.LTS -e --source winget
+```
+
+Після встановлення перевірити:
+
+```powershell
+node --version
+npm --version
+```
+
+Якщо `winget` недоступний, Node.js LTS можна встановити вручну:
+
+```text
+https://nodejs.org/
+```
+
+### 3. Встановити Python
+
+У PowerShell виконати:
+
+```powershell
+winget install --id Python.Python.3.12 -e --source winget
+```
+
+Після встановлення перевірити:
+
+```powershell
+python --version
+pip --version
+```
+
+Якщо `winget` недоступний, Python можна встановити вручну:
+
+```text
+https://www.python.org/downloads/
+```
+
+Також можна використати Anaconda:
+
+```powershell
+winget install --id Anaconda.Anaconda3 -e --source winget
+```
+
+Якщо команда `python` не знаходиться після встановлення, відкрийте новий PowerShell або додайте Python у `PATH`.
+
+### 4. Скопіювати Проєкт
+
+```powershell
+git clone https://github.com/dxhod/Teslyar_test.git
+cd Teslyar_test
+```
+
+### 5. Встановити JavaScript-Бібліотеки
+
+```powershell
+npm install
+```
+
+### 6. Встановити Python-Бібліотеки
+
+```powershell
+pip install -r requirements.txt
+```
+
+Якщо використовується Anaconda і `pip` не знаходиться, виконайте цю команду в **Anaconda Prompt**.
+
+### 7. Додати Groq API Key
+
+Створити файл `.env.local` з прикладу:
+
+```powershell
+copy .env.example .env.local
+```
+
+Відкрити `.env.local` і замінити:
+
+```bash
+GROQ_API_KEY=your_groq_api_key_here
+```
+
+на свій реальний Groq API key.
+
+Інші змінні можна залишити як є:
+
+```bash
+GROQ_MODEL=llama-3.3-70b-versatile
+GROQ_FALLBACK_MODEL=openai/gpt-oss-120b
+GROQ_SECONDARY_FALLBACK_MODEL=meta-llama/llama-4-scout-17b-16e-instruct
+```
+
+### 8. Підготувати Дані
+
+```powershell
+npm run prepare:data
+```
+
+Ця команда запускає Python-скрипт, читає CSV-файли з `data/raw` і генерує JSON для дашборду.
+На Windows вона автоматично пробує знайти Python через `python`, `py -3`, Anaconda або Miniconda.
+
+### 9. Запустити Дашборд
+
+```powershell
+npm run dev
+```
+
+У терміналі з'явиться адреса, наприклад:
+
+```text
+http://localhost:3000
+```
+
+Відкрити цю адресу в браузері.
+
+Якщо порт `3000` зайнятий, Next.js покаже інший порт, наприклад `3001`. У такому випадку відкрийте саме ту адресу, яку показав термінал.
+
+## Короткий Локальний Запуск
+
+Встановити залежності:
+
+```bash
+npm install
+```
+
+Згенерувати оброблені дані:
+
+```bash
+npm run prepare:data
+```
+
+Запустити дашборд:
+
+```bash
+npm run dev
+```
+
+Відкрити:
+
+```text
+http://localhost:3000
+```
+
+## Що Б Додав Далі
+
+- Підтримку більшої кількості місяців і вибір періоду.
+- Upload flow для нових Amazon-звітів.
+- Глибше зведення PPC з P&L, якщо буде підтверджене бізнес-правило атрибуції.
+- Експорт executive summary у PDF або Google Sheets.
+- Більш детальні AI-пояснення з посиланням на конкретні country/SKU рядки.

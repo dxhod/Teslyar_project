@@ -374,6 +374,30 @@ select {
   opacity: 0.55;
 }
 
+.question-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.question-chips button {
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 12px;
+  background: #fff;
+  color: #334155;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.question-chips button:hover {
+  border-color: #bfdbfe;
+  color: var(--blue);
+}
+
 .answer-box {
   margin-top: 14px;
   padding: 15px;

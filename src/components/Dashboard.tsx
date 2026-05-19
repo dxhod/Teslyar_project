@@ -40,6 +40,13 @@ const productMetricOptions = [
   { key: "unitsDelta", label: "Units Δ" }
 ] as const;
 
+const suggestedQuestions = [
+  "Які SKU варто перевірити першими?",
+  "Де найбільше просів Net profit?",
+  "Які товари продавались найкраще у квітні?",
+  "Що змінилось у маржі?"
+];
+
 type ProductMetric = (typeof productMetricOptions)[number]["key"];
 type SortDirection = "asc" | "desc";
 type AiStatus = "loading" | "groq" | "error";
@@ -315,7 +322,7 @@ export function Dashboard({ data }: { data: DashboardData }) {
           <div className="section-title">
             <div className="title-left">
               <Brain size={22} />
-              <h2>AI business summary</h2>
+              <h2>Executive insight</h2>
             </div>
             <span className={`ai-badge ${aiStatus}`}>{aiStatusText}</span>
           </div>
@@ -376,6 +383,13 @@ export function Dashboard({ data }: { data: DashboardData }) {
             {askStatus === "loading" ? "Thinking..." : "Ask AI"}
           </button>
         </form>
+        <div className="question-chips" aria-label="Suggested questions">
+          {suggestedQuestions.map((suggestion) => (
+            <button key={suggestion} type="button" onClick={() => setQuestion(suggestion)}>
+              {suggestion}
+            </button>
+          ))}
+        </div>
         {answer ? <div className={`answer-box ${askStatus === "error" ? "error" : ""}`}>{answer}</div> : null}
       </section>
 

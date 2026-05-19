@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "prepare:data": "C:\\Users\\dxdim\\anaconda3\\python.exe scripts\\prepare_data.py",
+    "prepare:data": "scripts\\prepare_data.cmd",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
