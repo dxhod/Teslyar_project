@@ -54,6 +54,7 @@ GROQ_MODEL=llama-3.3-70b-versatile
 
 `GROQ_MODEL` опційний. За замовчуванням використовується `llama-3.3-70b-versatile`.
 `GROQ_FALLBACK_MODEL` опційний. Якщо primary-модель недоступна, API автоматично пробує fallback-модель, за замовчуванням `openai/gpt-oss-120b`.
+`GROQ_SECONDARY_FALLBACK_MODEL` опційний. Якщо перші дві моделі недоступні або вперлись у ліміти, API пробує `meta-llama/llama-4-scout-17b-16e-instruct`.
 
 Без `GROQ_API_KEY` AI-блок і Q&A покажуть помилку інтеграції. Deterministic fallback навмисно не використовується, бо фіча має демонструвати реальну AI-інтеграцію.
 
@@ -79,6 +80,7 @@ npm run build
 GROQ_API_KEY=...
 GROQ_MODEL=llama-3.3-70b-versatile
 GROQ_FALLBACK_MODEL=openai/gpt-oss-120b
+GROQ_SECONDARY_FALLBACK_MODEL=meta-llama/llama-4-scout-17b-16e-instruct
 ```
 
 Python/pandas потрібні тільки для локальної підготовки нового JSON. Сам Vercel-деплой працює з готовим `public/data/dashboard.json`.

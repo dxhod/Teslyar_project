@@ -1,11 +1,13 @@
 export const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 export const DEFAULT_GROQ_MODEL = "llama-3.3-70b-versatile";
 export const DEFAULT_FALLBACK_GROQ_MODEL = "openai/gpt-oss-120b";
+export const DEFAULT_SECONDARY_FALLBACK_GROQ_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct";
 
 export function getGroqModels() {
   const primary = process.env.GROQ_MODEL || DEFAULT_GROQ_MODEL;
   const fallback = process.env.GROQ_FALLBACK_MODEL || DEFAULT_FALLBACK_GROQ_MODEL;
-  return [...new Set([primary, fallback])];
+  const secondaryFallback = process.env.GROQ_SECONDARY_FALLBACK_MODEL || DEFAULT_SECONDARY_FALLBACK_GROQ_MODEL;
+  return [...new Set([primary, fallback, secondaryFallback])];
 }
 
 export async function callGroq(payload: Record<string, unknown>, apiKey: string) {
