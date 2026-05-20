@@ -264,8 +264,62 @@ http://localhost:3000
 
 ## Що Б Додав Далі
 
-- Підтримку більшої кількості місяців і вибір періоду.
-- Upload flow для нових Amazon-звітів.
-- Глибше зведення PPC з P&L, якщо буде підтверджене бізнес-правило атрибуції.
+Якщо перетворювати це тестове в production-рішення, я б розвивав його не тільки в бік нових графіків, а в бік більш системної data/AI-архітектури.
+
+### Ingestion Pipeline
+
+- Окремий шар імпорту звітів із нормалізацією назв файлів.
+- Автоматичне визначення типу звіту, місяця, країни та marketplace.
+- Історія імпортів і версіонування processed datasets.
+- Можливість завантажувати нові місяці без зміни коду.
+
+### Schema Validation І Data Quality
+
+- Перевірка обов'язкових колонок для P&L і PPC-звітів.
+- Валідація числових форматів, валют, порожніх значень і неочікуваних типів.
+- Reconciliation між marketplace totals і product rows, щоб ловити дублювання або втрату рядків.
+- Перевірка дублікатів по `ASIN + SKU + month`.
+- Alerts для аномальних Margin, ROI, Refunds або негативних Sales.
+
+### Caching І Precomputed Aggregates
+
+- Кешування підготовлених агрегатів для portfolio, country, SKU і PPC-рівнів.
+- Окремі intermediate tables замість одного JSON, якщо кількість звітів зростатиме.
+- Token-budget-aware context builder для AI-запитів.
+- Збереження metadata: дата обробки, версія pipeline, кількість рядків, validation status.
+
+### RAG Для Q&A
+
+- Побудувати retrieval layer поверх підготовлених агрегатів, щоб не відправляти весь context у модель.
+- Індексувати country/SKU/month records і діставати тільки релевантні chunks під конкретне питання.
+- Додати semantic query routing: sales, profit, margin, PPC, country, SKU, refunds.
+- Це зменшить token usage, знизить ризик rate limits і зробить відповіді стабільнішими.
+
+### Multi-Agent Workflow
+
+- **Data validation agent** — перевіряє якість імпорту та схему.
+- **Anomaly detection agent** — шукає різкі зміни в Sales, Profit, Margin, Units, PPC.
+- **Insight agent** — формує executive summary для менеджера.
+- **Q&A router/retriever agent** — визначає, які дані потрібні для відповіді.
+- **Answer critic** — перевіряє, чи відповідь grounded у цифрах і не містить вигаданих висновків.
+
+### Prompt Templates І Evals
+
+- Окремі prompt templates для executive summary, attention SKU, country analysis і Q&A.
+- Набір evaluation cases для типових питань менеджерів.
+- Regression checks для prompt changes, щоб нові промпти не погіршували якість відповідей.
+- Перевірка hallucination rate і groundedness: чи кожен AI-висновок можна прив'язати до конкретної метрики.
+
+### Observability
+
+- Логування AI-запитів без секретів і без сирих приватних даних.
+- Збереження model used, fallback reason, latency, token estimate, status code.
+- Окремі error states для rate limits, invalid model response, missing API key.
+- Моніторинг того, які питання найчастіше ставлять користувачі.
+
+### UX Для Різних Ролей
+
+- Role-based insights: sales manager, PPC manager, finance.
+- Evidence cards під кожним AI-висновком із конкретними country/SKU метриками.
 - Експорт executive summary у PDF або Google Sheets.
-- Більш детальні AI-пояснення з посиланням на конкретні country/SKU рядки.
+- Підтримка більшої кількості місяців і вибір періоду.

@@ -77,6 +77,7 @@ export function buildQuestionContext(data: DashboardData, question: string) {
   const wantsUnits = /units|unit|шт|штук|одиниц|кільк/.test(normalized);
   const wantsCountry = /країн|country|marketplace|ринок|ринк/.test(normalized);
   const wantsDrops = /просів|просідан|падін|drop|decline|зниз|гірш|мінус|втратив/.test(normalized);
+  const wantsRisk = /перевір|уваг|ризик|risk|attention|пріоритет|priority|перш/.test(normalized);
   const wantsMargin = /margin|марж/.test(normalized);
   const wantsProfit = /profit|прибут|net/.test(normalized);
 
@@ -106,7 +107,7 @@ export function buildQuestionContext(data: DashboardData, question: string) {
     };
   }
 
-  if (wantsDrops || wantsMargin || wantsProfit) {
+  if (wantsDrops || wantsMargin || wantsProfit || wantsRisk) {
     return {
       ...base,
       countries: full.countries,

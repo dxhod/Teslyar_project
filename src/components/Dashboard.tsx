@@ -271,18 +271,14 @@ export function Dashboard({ data }: { data: DashboardData }) {
   }
 
   const aiStatusText =
-    aiStatus === "groq" ? "Groq AI" : aiStatus === "loading" ? "Loading AI" : "AI error";
+    aiStatus === "groq" ? "AI" : aiStatus === "loading" ? "Loading AI" : "AI error";
 
   return (
     <main>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Amazon EU · березень vs квітень 2026</p>
-          <h1>Teslyar Portfolio Dashboard</h1>
-          <p className="intro">
-            Локальний дашборд для швидкого розуміння, що змінилося в портфелі, де просів прибуток і які SKU
-            варто перевірити першими.
-          </p>
+          <p className="eyebrow">Teslyar portfolio · March vs April 2026</p>
+          <h1>Amazon EU Performance Dashboard</h1>
         </div>
       </header>
 
@@ -350,7 +346,7 @@ export function Dashboard({ data }: { data: DashboardData }) {
           ) : null}
         </div>
         <div className="attention-list">
-          <h3>SKU на увагу {aiStatus === "groq" ? <span>selected by Groq</span> : null}</h3>
+          <h3>SKU на увагу {aiStatus === "groq" ? <span>selected by AI</span> : null}</h3>
           {aiStatus === "loading" ? <div className="ai-state compact">Очікуємо відповідь Groq...</div> : null}
           {aiStatus === "error" ? <div className="ai-state compact error">Attention недоступний без Groq.</div> : null}
           {insight?.attention.map((item) => (
