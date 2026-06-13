@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Teslyar Amazon Dashboard",
+  title: "Northstar Amazon Dashboard",
   description: "Amazon EU portfolio dashboard for March vs April 2026"
 };
 

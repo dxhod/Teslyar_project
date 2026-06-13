@@ -1,4 +1,4 @@
-# Teslyar Amazon Dashboard
+# Northstar Amazon Dashboard
 
 Локальний аналітичний дашборд для Amazon EU P&L-звітів за березень і квітень 2026 року. Основна ціль — допомогти sales-менеджеру швидко зрозуміти, що змінилось у портфелі, де просів прибуток і які SKU потрібно перевірити першими.
 
@@ -169,8 +169,8 @@ winget install --id Anaconda.Anaconda3 -e --source winget
 ### 4. Скопіювати Проєкт
 
 ```powershell
-git clone https://github.com/dxhod/Teslyar_test.git
-cd Teslyar_test
+git clone <private-repository-url>
+cd <project-folder>
 ```
 
 ### 5. Встановити JavaScript-Бібліотеки

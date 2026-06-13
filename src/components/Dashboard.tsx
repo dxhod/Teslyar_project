@@ -277,7 +277,7 @@ export function Dashboard({ data }: { data: DashboardData }) {
     <main>
       <header className="page-header">
         <div>
-          <p className="eyebrow">Teslyar portfolio · March vs April 2026</p>
+          <p className="eyebrow">Northstar portfolio · March vs April 2026</p>
           <h1>Amazon EU Performance Dashboard</h1>
         </div>
       </header>

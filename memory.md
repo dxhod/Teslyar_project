@@ -2,7 +2,7 @@
 
 ## Current Project
 
-This repository is the test-task version of an Amazon EU analytics dashboard for the Teslyar dataset.
+This repository is the test-task version of an Amazon EU analytics dashboard for the Northstar dataset.
 
 The app compares March 2026 vs April 2026 using:
 
@@ -15,7 +15,7 @@ The app compares March 2026 vs April 2026 using:
 The current GitHub repository is:
 
 ```text
-dxhod/Teslyar_project
+private repository
 ```
 
 The repository contains real Amazon report files and derived JSON analytics. It should remain private.
@@ -118,7 +118,7 @@ npm run build
 Header:
 
 ```text
-Teslyar portfolio · March vs April 2026
+Northstar portfolio · March vs April 2026
 Amazon EU Performance Dashboard
 ```
 
@@ -141,7 +141,7 @@ Visible UI should avoid showing Groq provider name. It should say `AI`, not `Gro
 The project has already been pushed to:
 
 ```text
-https://github.com/dxhod/Teslyar_project
+private repository URL
 ```
 
 Because real Amazon report data is included, keep this repository private.
@@ -156,7 +156,7 @@ Recommended approach:
 2. Remove `.git` history.
 3. Remove all real CSV files and real derived JSON.
 4. Generate synthetic demo data with similar structure and edge cases.
-5. Remove all Teslyar references.
+5. Remove all private brand references.
 6. Translate UI and README to English.
 7. Rename project to something generic, for example:
 
@@ -179,4 +179,4 @@ The portfolio version should demonstrate the same engineering ideas:
 - model fallback chain;
 - clean product-like dashboard UI.
 
-Do not reuse real Teslyar/Amazon report data in the public pet project.
+Do not reuse real private-brand/Amazon report data in the public pet project.
