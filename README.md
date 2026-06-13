@@ -1,74 +1,74 @@
 # Northstar Amazon Dashboard
 
-Локальний аналітичний дашборд для Amazon EU P&L-звітів за березень і квітень 2026 року. Основна ціль — допомогти sales-менеджеру швидко зрозуміти, що змінилось у портфелі, де просів прибуток і які SKU потрібно перевірити першими.
+A local analytics dashboard for Amazon EU P&L reports covering March and April 2026. The main goal is to help a sales manager quickly understand what changed in the portfolio, where profit declined, and which SKUs deserve attention first.
 
-## Чому Такий Стек
+## Why This Stack
 
-**Python + pandas** використовується для підготовки даних, бо вхідні файли — це реальні CSV-звіти з різними форматами: `;` як роздільник у P&L, кома як десятковий розділювач, NBSP у числах, різні назви файлів і окремі PPC-звіти. pandas добре підходить саме для такого очищення, нормалізації та агрегації.
+**Python + pandas** prepares the data because the source files are real CSV reports with messy formats: `;` delimiters in P&L files, European number formats, NBSP characters inside numbers, inconsistent file names, and separate PPC reports.
 
-**Next.js + TypeScript** використовується для інтерфейсу, бо результат має виглядати як невеликий продукт, а не як технічний notebook. Це також дає зручний локальний запуск і зрозумілу структуру коду.
+**Next.js + TypeScript** powers the dashboard UI so the result feels like a small product instead of a technical notebook. It also keeps the local workflow and code structure clear.
 
-**Groq** використовується для AI-шару: модель формує executive insight, сама обирає SKU на увагу з підготовлених кандидатів і відповідає на питання по оброблених даних.
+**Groq** powers the AI layer. The model generates the executive insight, selects the SKUs to watch from prepared candidates, and answers questions over processed aggregates.
 
 ## Product Thinking
 
-Головний екран побудований навколо питань, які sales-менеджер поставить першими:
+The first screen is built around the questions a sales manager would ask first:
 
-- як змінились Sales;
-- що сталося з Net profit;
-- чи просіла Margin;
-- чи змінились Units;
-- у яких країнах або товарах проблема найбільша.
+- How did Sales change?
+- What happened to Net profit?
+- Did Margin decline?
+- Did Units change?
+- Which countries or products are driving the biggest change?
 
-Тому зверху показані ключові KPI, нижче — розріз по країнах, список SKU на увагу та таблиця продуктів із пошуком і сортуванням.
+The dashboard therefore starts with key KPIs, then shows country breakdowns, AI-selected SKUs to watch, and a searchable/sortable product table.
 
-AI-фіча зроблена не як “чат заради чату”. Основна користь AI тут:
+The AI feature is not a chat widget for its own sake. Its main value is:
 
-- **Executive insight** — коротке пояснення, що змінилось за місяць;
-- **SKU на увагу** — Groq сам обирає 3-5 SKU з підготовлених risk candidates;
-- **Запитайте AI-аналітика** — Q&A по агрегованих даних після pandas-обробки.
+- **Executive insight**: a short explanation of what changed month over month.
+- **SKUs to watch**: the model chooses 3-5 priority SKUs from prepared risk candidates.
+- **Ask the AI analyst**: Q&A over pandas-processed aggregates.
 
-Модель не отримує сирі CSV і не рахує метрики самостійно. Python готує числа, Groq інтерпретує вже пораховані факти.
+The model does not receive raw CSV files and does not calculate metrics by itself. Python prepares the numbers first; Groq interprets already calculated facts.
 
-## Обробка Даних
+## Data Processing
 
-Сирі файли лежать у:
+Raw files live in:
 
 ```text
 data/raw
 ```
 
-Скрипт підготовки:
+The preparation script is:
 
 ```text
 scripts/prepare_data.py
 ```
 
-Він обробляє:
+It handles:
 
-- P&L CSV із `;` як delimiter;
-- PPC CSV з окремою структурою;
-- європейські числа типу `1 234,56`;
-- NBSP у числах;
-- різний регістр і непослідовні назви файлів;
-- marketplace alias `Amazon.com.be -> BE`;
-- country-level totals окремо від product rows;
-- агрегацію товарів по `ASIN + SKU`.
+- P&L CSV files with `;` as delimiter;
+- PPC CSV files with a different structure;
+- European numbers such as `1 234,56`;
+- NBSP characters inside numbers;
+- inconsistent casing and file names;
+- marketplace alias mapping, for example `Amazon.com.be -> BE`;
+- country-level totals separately from product rows;
+- product aggregation by `ASIN + SKU`.
 
-P&L totals беруться з marketplace-level рядків, щоб не подвоювати значення через продуктові рядки. PPC використовується як рекламний контекст по країнах і портфелю. PPC не зводиться з P&L на SKU-рівні, бо для цього потрібне окреме підтверджене правило атрибуції.
+P&L totals are taken from marketplace-level rows to avoid double-counting product rows. PPC is used as country and portfolio advertising context. PPC is not joined to P&L at SKU level because that would require a confirmed attribution rule.
 
-Скрипт генерує:
+The script generates:
 
 ```text
 data/processed/dashboard.json
 public/data/dashboard.json
 ```
 
-Next.js читає готовий JSON із `public/data/dashboard.json`.
+Next.js reads the prepared JSON from `public/data/dashboard.json`.
 
 ## AI Layer
 
-Змінні середовища для Groq:
+Groq environment variables:
 
 ```bash
 GROQ_API_KEY=your_groq_api_key_here
@@ -77,133 +77,133 @@ GROQ_FALLBACK_MODEL=openai/gpt-oss-120b
 GROQ_SECONDARY_FALLBACK_MODEL=meta-llama/llama-4-scout-17b-16e-instruct
 ```
 
-Порядок моделей:
+Model order:
 
 1. `GROQ_MODEL`
 2. `GROQ_FALLBACK_MODEL`
 3. `GROQ_SECONDARY_FALLBACK_MODEL`
 
-Deterministic fallback для AI навмисно не використовується. Якщо всі Groq-моделі недоступні або впираються в ліміти, дашборд показує помилку AI-інтеграції. Це зроблено свідомо, бо тестове має демонструвати реальну AI-інтеграцію.
+There is intentionally no deterministic fallback for AI. If every Groq model fails or hits limits, the dashboard shows an AI integration error because the test task is meant to demonstrate a real AI integration.
 
-Для Q&A використовується question-specific context. Наприклад, якщо питання про найкращі продажі, у модель передаються тільки top sales / top units зрізи. Якщо питання про просідання, передаються country data та biggest drops. Це зменшує розмір запиту і допомагає не впиратися в token-per-minute ліміти.
+Q&A uses question-specific context. For example, best-selling product questions receive only top sales and top unit slices. Drop/risk questions receive country data and biggest-drop helper lists. This keeps requests smaller and reduces the chance of hitting token-per-minute limits.
 
-Debug endpoint для перевірки context:
+Debug endpoint:
 
 ```text
 /api/debug/qa-context
-/api/debug/qa-context?question=Який SKU продавався найкраще у квітні?
+/api/debug/qa-context?question=Which SKU sold best in April?
 ```
 
-## Повний Запуск З Нуля Для Windows
+## Full Windows Setup
 
-### 1. Встановити Git
+### 1. Install Git
 
-У PowerShell виконати:
+Run in PowerShell:
 
 ```powershell
 winget install --id Git.Git -e --source winget
 ```
 
-Після встановлення перевірити в PowerShell:
+Check installation:
 
 ```powershell
 git --version
 ```
 
-Якщо `winget` недоступний, Git можна встановити вручну:
+If `winget` is not available, install Git manually:
 
 ```text
 https://git-scm.com/download/win
 ```
 
-### 2. Встановити Node.js
+### 2. Install Node.js
 
-У PowerShell виконати:
+Run in PowerShell:
 
 ```powershell
 winget install --id OpenJS.NodeJS.LTS -e --source winget
 ```
 
-Після встановлення перевірити:
+Check installation:
 
 ```powershell
 node --version
 npm --version
 ```
 
-Якщо `winget` недоступний, Node.js LTS можна встановити вручну:
+If `winget` is not available, install Node.js LTS manually:
 
 ```text
 https://nodejs.org/
 ```
 
-### 3. Встановити Python
+### 3. Install Python
 
-У PowerShell виконати:
+Run in PowerShell:
 
 ```powershell
 winget install --id Python.Python.3.12 -e --source winget
 ```
 
-Після встановлення перевірити:
+Check installation:
 
 ```powershell
 python --version
 pip --version
 ```
 
-Якщо `winget` недоступний, Python можна встановити вручну:
+If `winget` is not available, install Python manually:
 
 ```text
 https://www.python.org/downloads/
 ```
 
-Також можна використати Anaconda:
+Anaconda also works:
 
 ```powershell
 winget install --id Anaconda.Anaconda3 -e --source winget
 ```
 
-Якщо команда `python` не знаходиться після встановлення, відкрийте новий PowerShell або додайте Python у `PATH`.
+If the `python` command is still unavailable after installation, open a new PowerShell window or add Python to `PATH`.
 
-### 4. Скопіювати Проєкт
+### 4. Clone The Project
 
 ```powershell
 git clone <private-repository-url>
 cd <project-folder>
 ```
 
-### 5. Встановити JavaScript-Бібліотеки
+### 5. Install JavaScript Dependencies
 
 ```powershell
 npm install
 ```
 
-### 6. Встановити Python-Бібліотеки
+### 6. Install Python Dependencies
 
 ```powershell
 pip install -r requirements.txt
 ```
 
-Якщо використовується Anaconda і `pip` не знаходиться, виконайте цю команду в **Anaconda Prompt**.
+If you use Anaconda and `pip` is not available in PowerShell, run this command in **Anaconda Prompt**.
 
-### 7. Додати Groq API Key
+### 7. Add The Groq API Key
 
-Створити файл `.env.local` з прикладу:
+Create `.env.local` from the example:
 
 ```powershell
 copy .env.example .env.local
 ```
 
-Відкрити `.env.local` і замінити:
+Open `.env.local` and replace:
 
 ```bash
 GROQ_API_KEY=your_groq_api_key_here
 ```
 
-на свій реальний Groq API key.
+with your real Groq API key.
 
-Інші змінні можна залишити як є:
+The other variables can stay as provided:
 
 ```bash
 GROQ_MODEL=llama-3.3-70b-versatile
@@ -211,115 +211,112 @@ GROQ_FALLBACK_MODEL=openai/gpt-oss-120b
 GROQ_SECONDARY_FALLBACK_MODEL=meta-llama/llama-4-scout-17b-16e-instruct
 ```
 
-### 8. Підготувати Дані
+### 8. Prepare Data
 
 ```powershell
 npm run prepare:data
 ```
 
-Ця команда запускає Python-скрипт, читає CSV-файли з `data/raw` і генерує JSON для дашборду.
-На Windows вона автоматично пробує знайти Python через `python`, `py -3`, Anaconda або Miniconda.
+This command runs the Python script, reads CSV files from `data/raw`, and generates the JSON used by the dashboard. On Windows, it automatically tries `python`, `py -3`, Anaconda, and Miniconda.
 
-### 9. Запустити Дашборд
+### 9. Run The Dashboard
 
 ```powershell
 npm run dev
 ```
 
-У терміналі з'явиться адреса, наприклад:
+The terminal will show a local URL, for example:
 
 ```text
 http://localhost:3000
 ```
 
-Відкрити цю адресу в браузері.
+Open that URL in the browser. If port `3000` is busy, Next.js will choose another port such as `3001`; open the URL printed by the terminal.
 
-Якщо порт `3000` зайнятий, Next.js покаже інший порт, наприклад `3001`. У такому випадку відкрийте саме ту адресу, яку показав термінал.
+## Quick Local Start
 
-## Короткий Локальний Запуск
-
-Встановити залежності:
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-Згенерувати оброблені дані:
+Generate processed data:
 
 ```bash
 npm run prepare:data
 ```
 
-Запустити дашборд:
+Run the dashboard:
 
 ```bash
 npm run dev
 ```
 
-Відкрити:
+Open:
 
 ```text
 http://localhost:3000
 ```
 
-## Що Б Додав Далі
+## What I Would Add Next
 
-Якщо перетворювати це тестове в production-рішення, я б розвивав його не тільки в бік нових графіків, а в бік більш системної data/AI-архітектури.
+If this test task were turned into a production solution, I would evolve it toward a more systematic data and AI architecture instead of only adding more charts.
 
 ### Ingestion Pipeline
 
-- Окремий шар імпорту звітів із нормалізацією назв файлів.
-- Автоматичне визначення типу звіту, місяця, країни та marketplace.
-- Історія імпортів і версіонування processed datasets.
-- Можливість завантажувати нові місяці без зміни коду.
+- Add a dedicated report import layer with file-name normalization.
+- Automatically detect report type, month, country, and marketplace.
+- Store import history and processed dataset versions.
+- Allow new months to be uploaded without code changes.
 
-### Schema Validation І Data Quality
+### Schema Validation And Data Quality
 
-- Перевірка обов'язкових колонок для P&L і PPC-звітів.
-- Валідація числових форматів, валют, порожніх значень і неочікуваних типів.
-- Reconciliation між marketplace totals і product rows, щоб ловити дублювання або втрату рядків.
-- Перевірка дублікатів по `ASIN + SKU + month`.
-- Alerts для аномальних Margin, ROI, Refunds або негативних Sales.
+- Validate required columns for P&L and PPC reports.
+- Validate number formats, currencies, empty values, and unexpected types.
+- Reconcile marketplace totals against product rows to catch duplicates or missing rows.
+- Detect duplicates by `ASIN + SKU + month`.
+- Add alerts for abnormal Margin, ROI, Refunds, or negative Sales.
 
-### Caching І Precomputed Aggregates
+### Caching And Precomputed Aggregates
 
-- Кешування підготовлених агрегатів для portfolio, country, SKU і PPC-рівнів.
-- Окремі intermediate tables замість одного JSON, якщо кількість звітів зростатиме.
-- Token-budget-aware context builder для AI-запитів.
-- Збереження metadata: дата обробки, версія pipeline, кількість рядків, validation status.
+- Cache prepared aggregates for portfolio, country, SKU, and PPC levels.
+- Split intermediate tables from the single JSON file when report volume grows.
+- Make the AI context builder token-budget-aware.
+- Store metadata such as processing date, pipeline version, row counts, and validation status.
 
-### RAG Для Q&A
+### RAG For Q&A
 
-- Побудувати retrieval layer поверх підготовлених агрегатів, щоб не відправляти весь context у модель.
-- Індексувати country/SKU/month records і діставати тільки релевантні chunks під конкретне питання.
-- Додати semantic query routing: sales, profit, margin, PPC, country, SKU, refunds.
-- Це зменшить token usage, знизить ризик rate limits і зробить відповіді стабільнішими.
+- Build a retrieval layer over prepared aggregates so the model does not receive the full context.
+- Index country, SKU, and month records and retrieve only relevant chunks for each question.
+- Add semantic query routing for sales, profit, margin, PPC, country, SKU, and refunds.
+- Reduce token usage, lower rate-limit risk, and make answers more stable.
 
 ### Multi-Agent Workflow
 
-- **Data validation agent** — перевіряє якість імпорту та схему.
-- **Anomaly detection agent** — шукає різкі зміни в Sales, Profit, Margin, Units, PPC.
-- **Insight agent** — формує executive summary для менеджера.
-- **Q&A router/retriever agent** — визначає, які дані потрібні для відповіді.
-- **Answer critic** — перевіряє, чи відповідь grounded у цифрах і не містить вигаданих висновків.
+- **Data validation agent**: checks import quality and schema.
+- **Anomaly detection agent**: finds sharp changes in Sales, Profit, Margin, Units, and PPC.
+- **Insight agent**: creates the executive summary for the manager.
+- **Q&A router/retriever agent**: decides which data is needed for the answer.
+- **Answer critic**: checks that the answer is grounded in numbers and does not invent conclusions.
 
-### Prompt Templates І Evals
+### Prompt Templates And Evals
 
-- Окремі prompt templates для executive summary, attention SKU, country analysis і Q&A.
-- Набір evaluation cases для типових питань менеджерів.
-- Regression checks для prompt changes, щоб нові промпти не погіршували якість відповідей.
-- Перевірка hallucination rate і groundedness: чи кожен AI-висновок можна прив'язати до конкретної метрики.
+- Use separate prompt templates for executive summary, attention SKUs, country analysis, and Q&A.
+- Add evaluation cases for common manager questions.
+- Add regression checks for prompt changes.
+- Track hallucination rate and groundedness: every AI conclusion should map back to a concrete metric.
 
 ### Observability
 
-- Логування AI-запитів без секретів і без сирих приватних даних.
-- Збереження model used, fallback reason, latency, token estimate, status code.
-- Окремі error states для rate limits, invalid model response, missing API key.
-- Моніторинг того, які питання найчастіше ставлять користувачі.
+- Log AI requests without secrets or raw private data.
+- Store model used, fallback reason, latency, token estimate, and status code.
+- Add separate error states for rate limits, invalid model responses, and missing API key.
+- Monitor which questions users ask most often.
 
-### UX Для Різних Ролей
+### Role-Based UX
 
-- Role-based insights: sales manager, PPC manager, finance.
-- Evidence cards під кожним AI-висновком із конкретними country/SKU метриками.
-- Експорт executive summary у PDF або Google Sheets.
-- Підтримка більшої кількості місяців і вибір періоду.
+- Add role-based insights for sales managers, PPC managers, and finance users.
+- Show evidence cards under each AI conclusion with concrete country/SKU metrics.
+- Export the executive summary to PDF or Google Sheets.
+- Support more months and period selection.

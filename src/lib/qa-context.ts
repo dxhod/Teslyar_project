@@ -72,14 +72,14 @@ export function buildQuestionContext(data: DashboardData, question: string) {
   const full = buildQaContext(data);
   const normalized = question.toLowerCase();
   const wantsTopSales =
-    /найбільш|найбільше|топ|top|best|продавав|продаж|sales|revenue|вируч/.test(normalized) &&
-    !/просів|падін|drop|decline|зниз/.test(normalized);
-  const wantsUnits = /units|unit|шт|штук|одиниц|кільк/.test(normalized);
-  const wantsCountry = /країн|country|marketplace|ринок|ринк/.test(normalized);
-  const wantsDrops = /просів|просідан|падін|drop|decline|зниз|гірш|мінус|втратив/.test(normalized);
-  const wantsRisk = /перевір|уваг|ризик|risk|attention|пріоритет|priority|перш/.test(normalized);
-  const wantsMargin = /margin|марж/.test(normalized);
-  const wantsProfit = /profit|прибут|net/.test(normalized);
+    /largest|highest|top|best|sold|sales|revenue|selling|seller/.test(normalized) &&
+    !/drop|decline|decrease|fell|fall|lower|loss|lost|worse/.test(normalized);
+  const wantsUnits = /units|unit|quantity|volume|sold/.test(normalized);
+  const wantsCountry = /country|countries|marketplace|market|region/.test(normalized);
+  const wantsDrops = /drop|decline|decrease|fell|fall|lower|loss|lost|worse|negative/.test(normalized);
+  const wantsRisk = /check|watch|review|attention|risk|priority|first|investigate/.test(normalized);
+  const wantsMargin = /margin|profitability/.test(normalized);
+  const wantsProfit = /profit|net/.test(normalized);
 
   const base = {
     period: full.period,

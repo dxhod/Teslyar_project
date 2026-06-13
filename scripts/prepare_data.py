@@ -93,7 +93,7 @@ def fmt_amount(value: float) -> str:
 
 
 def fmt_pct(value: float) -> str:
-    return f"{value:.1f}".replace(".", ",")
+    return f"{value:.1f}"
 
 
 def read_pl_files() -> tuple[pd.DataFrame, list[str]]:
@@ -307,8 +307,8 @@ def build_products(pl: pd.DataFrame) -> list[dict[str, Any]]:
 
 def build_insight(portfolio: dict[str, Any], countries: list[dict[str, Any]], products: list[dict[str, Any]]) -> dict[str, Any]:
     profit_drops = sorted([row for row in countries if row["netProfitDelta"] < 0], key=lambda row: row["netProfitDelta"])
-    sales_direction = "зросли" if portfolio["sales"]["delta"] >= 0 else "знизились"
-    profit_direction = "зріс" if portfolio["netProfit"]["delta"] >= 0 else "знизився"
+    sales_direction = "increased" if portfolio["sales"]["delta"] >= 0 else "decreased"
+    profit_direction = "increased" if portfolio["netProfit"]["delta"] >= 0 else "decreased"
 
     attention: list[dict[str, Any]] = []
     for product in products:
@@ -320,20 +320,20 @@ def build_insight(portfolio: dict[str, Any], countries: list[dict[str, Any]], pr
         impact = abs(product["netProfitDelta"])
 
         if product["netProfitDelta"] < -100:
-            reasons.append(f"Net profit впав на EUR {fmt_amount(abs(product['netProfitDelta']))}")
+            reasons.append(f"Net profit fell by EUR {fmt_amount(abs(product['netProfitDelta']))}")
             severity = "high"
 
         if product["salesDelta"] > 100 and product["netProfitDelta"] < 0:
-            reasons.append("продажі ростуть, але прибуток погіршується")
+            reasons.append("sales grew, but profit deteriorated")
             severity = "high"
             impact += abs(product["salesDelta"]) * 0.2
 
         if product["marginDelta"] < -8:
-            reasons.append(f"маржа просіла на {fmt_pct(abs(product['marginDelta']))} п.п.")
+            reasons.append(f"margin dropped by {fmt_pct(abs(product['marginDelta']))} pp")
             severity = "high" if severity == "high" else "medium"
 
         if product["unitsDelta"] < -10:
-            reasons.append(f"продано на {abs(int(product['unitsDelta']))} шт. менше")
+            reasons.append(f"sold {abs(int(product['unitsDelta']))} fewer units")
             severity = "high" if severity == "high" else "medium"
 
         if reasons:
@@ -349,30 +349,30 @@ def build_insight(portfolio: dict[str, Any], countries: list[dict[str, Any]], pr
 
     attention = sorted(attention, key=lambda row: row["impact"], reverse=True)[:5]
     drop_text = (
-        "Найбільше просідання прибутку: "
+        "The largest profit drops: "
         + ", ".join([f"{row['country']} EUR {fmt_amount(row['netProfitDelta'])}" for row in profit_drops[:3]])
         + "."
         if profit_drops
-        else "У жодній країні немає падіння Net profit проти березня."
+        else "No country shows a Net profit decline versus March."
     )
 
     return {
-        "headline": f"У квітні Sales {sales_direction} на {fmt_pct(abs(portfolio['sales']['deltaPct'] or 0))}%, а Net profit {profit_direction} на {fmt_pct(abs(portfolio['netProfit']['deltaPct'] or 0))}%.",
+        "headline": f"In April, Sales {sales_direction} by {fmt_pct(abs(portfolio['sales']['deltaPct'] or 0))}%, and Net profit {profit_direction} by {fmt_pct(abs(portfolio['netProfit']['deltaPct'] or 0))}%.",
         "bullets": [
             f"Sales: EUR {fmt_amount(portfolio['sales']['march'])} -> EUR {fmt_amount(portfolio['sales']['april'])}.",
             f"Net profit: EUR {fmt_amount(portfolio['netProfit']['march'])} -> EUR {fmt_amount(portfolio['netProfit']['april'])}; margin {fmt_pct(portfolio['margin']['march'])}% -> {fmt_pct(portfolio['margin']['april'])}%.",
             drop_text,
-            f"PPC spend за country-звітами: EUR {fmt_amount(portfolio['adSpend']['march'])} -> EUR {fmt_amount(portfolio['adSpend']['april'])}.",
+            f"PPC spend from country reports: EUR {fmt_amount(portfolio['adSpend']['march'])} -> EUR {fmt_amount(portfolio['adSpend']['april'])}.",
         ],
         "attention": attention,
         "actions": [
-            "Перевірити SKU з найбільшим падінням Net profit і відокремити проблему попиту від проблеми маржі.",
-            "Для країн із просіданням прибутку порівняти зміну Sales, Units, Margin і PPC spend.",
-            "Для SKU, де продажі ростуть, а прибуток падає, перевірити fees, COGS, refunds, promo та ads.",
+            "Review SKUs with the largest Net profit decline and separate demand issues from margin issues.",
+            "For countries with profit declines, compare Sales, Units, Margin, and PPC spend changes.",
+            "For SKUs where sales grow but profit falls, review fees, COGS, refunds, promotions, and ads.",
         ],
         "evidence": [
-            "AI-блок не вигадує цифри: pandas спочатку знаходить зміни, падіння і конфлікти Sales vs Profit, а потім формує бізнес-коментар.",
-            "Для production-версії цей structured context можна передати в OpenAI API для більш природного тексту без зміни аналітичної логіки.",
+            "The AI block does not invent numbers: pandas first identifies changes, drops, and Sales vs Profit conflicts, then forms business commentary.",
+            "For a production version, this structured context can be sent to an LLM API for more natural text without changing the analytics logic.",
         ],
     }
 

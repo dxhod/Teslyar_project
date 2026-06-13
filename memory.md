@@ -84,7 +84,7 @@ Debug endpoint:
 
 ```text
 /api/debug/qa-context
-/api/debug/qa-context?question=Який SKU продавався найкраще у квітні?
+/api/debug/qa-context?question=Which SKU sold best in April?
 ```
 
 ## Local Commands

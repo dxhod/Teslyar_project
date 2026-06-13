@@ -35,16 +35,16 @@ const metricOptions: Array<{ key: MetricKey; label: string }> = [
 const productMetricOptions = [
   { key: "salesApril", label: "Sales Apr" },
   { key: "netProfitApril", label: "Net profit Apr" },
-  { key: "netProfitDelta", label: "Profit Δ" },
-  { key: "marginDelta", label: "Margin Δ" },
-  { key: "unitsDelta", label: "Units Δ" }
+  { key: "netProfitDelta", label: "Profit delta" },
+  { key: "marginDelta", label: "Margin delta" },
+  { key: "unitsDelta", label: "Units delta" }
 ] as const;
 
 const suggestedQuestions = [
-  "Які SKU варто перевірити першими?",
-  "Де найбільше просів Net profit?",
-  "Які товари продавались найкраще у квітні?",
-  "Що змінилось у маржі?"
+  "Which SKUs should we check first?",
+  "Where did Net profit drop the most?",
+  "Which products sold best in April?",
+  "What changed in margin?"
 ];
 
 type ProductMetric = (typeof productMetricOptions)[number]["key"];
@@ -61,7 +61,7 @@ function money(value: number) {
 }
 
 function number(value: number, maximumFractionDigits = 0) {
-  return new Intl.NumberFormat("uk-UA", { maximumFractionDigits }).format(value);
+  return new Intl.NumberFormat("en-US", { maximumFractionDigits }).format(value);
 }
 
 function pct(value: number) {
@@ -143,7 +143,7 @@ function KpiCard({
       <div>
         <p className="eyebrow">{title}</p>
         <strong>{value}</strong>
-        <span className="muted">Березень: {previous}</span>
+        <span className="muted">March: {previous}</span>
       </div>
       <div className={`change ${good ? "positive" : "negative"}`}>
         {numericChange ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
@@ -188,7 +188,7 @@ export function Dashboard({ data }: { data: DashboardData }) {
         setAiStatus("error");
       } catch {
         if (!cancelled) {
-          setAiError("Не вдалося звернутися до Groq AI endpoint. Перевірте dev server і env-змінні.");
+          setAiError("Could not reach the AI endpoint. Check the dev server and environment variables.");
           setAiStatus("error");
         }
       }
@@ -255,16 +255,16 @@ export function Dashboard({ data }: { data: DashboardData }) {
       try {
         payload = raw ? JSON.parse(raw) : {};
       } catch {
-        payload = { message: raw || `AI endpoint повернув HTTP ${response.status} без JSON-відповіді.` };
+        payload = { message: raw || `AI endpoint returned HTTP ${response.status} without a JSON response.` };
       }
 
-      setAnswer(response.ok ? payload.answer || "Не вдалося отримати відповідь." : payload.message || "Groq AI повернув помилку.");
+      setAnswer(response.ok ? payload.answer || "Could not get an answer." : payload.message || "AI returned an error.");
       setAskStatus(response.ok ? "done" : "error");
     } catch (error) {
       setAnswer(
-        `Не вдалося звернутися до AI endpoint: ${
+        `Could not reach the AI endpoint: ${
           error instanceof Error ? error.message : "unknown error"
-        }. Перевірте, що сторінка відкрита на актуальному порту з npm run dev.`
+        }. Check that the page is open on the current npm run dev port.`
       );
       setAskStatus("error");
     }
@@ -301,7 +301,7 @@ export function Dashboard({ data }: { data: DashboardData }) {
           title="Margin"
           value={pct(data.portfolio.margin.april)}
           previous={pct(data.portfolio.margin.march)}
-          change={`${data.portfolio.margin.delta >= 0 ? "+" : ""}${number(data.portfolio.margin.delta, 1)} п.п.`}
+          change={`${data.portfolio.margin.delta >= 0 ? "+" : ""}${number(data.portfolio.margin.delta, 1)} pp`}
           icon={BarChart3}
         />
         <KpiCard
@@ -323,7 +323,7 @@ export function Dashboard({ data }: { data: DashboardData }) {
             <span className={`ai-badge ${aiStatus}`}>{aiStatusText}</span>
           </div>
           {aiStatus === "loading" ? (
-            <div className="ai-state">Groq аналізує підготовлені pandas-агрегати...</div>
+            <div className="ai-state">AI is analyzing prepared pandas aggregates...</div>
           ) : aiStatus === "error" ? (
             <div className="ai-state error">{aiError}</div>
           ) : insight ? (
@@ -346,9 +346,9 @@ export function Dashboard({ data }: { data: DashboardData }) {
           ) : null}
         </div>
         <div className="attention-list">
-          <h3>SKU на увагу {aiStatus === "groq" ? <span>selected by AI</span> : null}</h3>
-          {aiStatus === "loading" ? <div className="ai-state compact">Очікуємо відповідь Groq...</div> : null}
-          {aiStatus === "error" ? <div className="ai-state compact error">Attention недоступний без Groq.</div> : null}
+          <h3>SKUs to watch {aiStatus === "groq" ? <span>selected by AI</span> : null}</h3>
+          {aiStatus === "loading" ? <div className="ai-state compact">Waiting for the AI response...</div> : null}
+          {aiStatus === "error" ? <div className="ai-state compact error">The attention list is unavailable without AI.</div> : null}
           {insight?.attention.map((item) => (
               <article className={`attention-card ${item.severity}`} key={`${item.title}-${item.reason}`}>
                 <AlertTriangle size={17} />
@@ -366,14 +366,14 @@ export function Dashboard({ data }: { data: DashboardData }) {
         <div className="panel-header product-header">
           <div>
             <p className="eyebrow">AI Q&A</p>
-            <h2>Запитайте AI-аналітика</h2>
+            <h2>Ask the AI analyst</h2>
           </div>
         </div>
         <form className="ask-form" onSubmit={handleAskSubmit}>
           <input
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
-            placeholder="Наприклад: який SKU мав найбільші Sales у квітні та березні?"
+            placeholder="Example: which SKU had the highest Sales in April and March?"
           />
           <button type="submit" disabled={askStatus === "loading" || !question.trim()}>
             {askStatus === "loading" ? "Thinking..." : "Ask AI"}
@@ -394,7 +394,7 @@ export function Dashboard({ data }: { data: DashboardData }) {
           <div className="panel-header">
             <div>
               <p className="eyebrow">Country breakdown</p>
-              <h2>Топ країн за метрикою</h2>
+              <h2>Top countries by metric</h2>
             </div>
             <div className="toolbar">
               <select value={countryMetricKey} onChange={(event) => setCountryMetricKey(event.target.value as MetricKey)}>
@@ -436,7 +436,7 @@ export function Dashboard({ data }: { data: DashboardData }) {
 
         <aside className="panel">
           <p className="eyebrow">Where we dropped</p>
-          <h2>Просідання Net profit</h2>
+          <h2>Net profit drops</h2>
           <div className="drop-list">
             {biggestDrops.map((row) => (
               <div className="drop-row" key={row.country}>
@@ -465,7 +465,7 @@ export function Dashboard({ data }: { data: DashboardData }) {
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Пошук SKU, ASIN або назви"
+                placeholder="Search SKU, ASIN, or product name"
               />
             </label>
           </div>
@@ -512,7 +512,7 @@ export function Dashboard({ data }: { data: DashboardData }) {
                   <td className={row.netProfitDelta >= 0 ? "positive-text" : "negative-text"}>{money(row.netProfitDelta)}</td>
                   <td className={row.marginDelta >= 0 ? "positive-text" : "negative-text"}>
                     {row.marginDelta >= 0 ? "+" : ""}
-                    {number(row.marginDelta, 1)} п.п.
+                    {number(row.marginDelta, 1)} pp
                   </td>
                   <td className={row.unitsDelta >= 0 ? "positive-text" : "negative-text"}>
                     {row.unitsDelta >= 0 ? "+" : ""}

@@ -1631,58 +1631,58 @@
     }
   ],
   "insight": {
-    "headline": "У квітні Sales знизились на 38,4%, а Net profit знизився на 45,5%.",
+    "headline": "In April, Sales decreased by 38.4%, and Net profit decreased by 45.5%.",
     "bullets": [
       "Sales: EUR 58 581 -> EUR 36 085.",
-      "Net profit: EUR 5 293 -> EUR 2 883; margin 9,0% -> 8,0%.",
-      "Найбільше просідання прибутку: ES EUR -1 577, IT EUR -1 234, PL EUR -93.",
-      "PPC spend за country-звітами: EUR 9 161 -> EUR 5 485."
+      "Net profit: EUR 5 293 -> EUR 2 883; margin 9.0% -> 8.0%.",
+      "The largest profit drops: ES EUR -1 577, IT EUR -1 234, PL EUR -93.",
+      "PPC spend from country reports: EUR 9 161 -> EUR 5 485."
     ],
     "attention": [
       {
         "title": "73-EFLH-T6DR",
         "subtitle": "B0DHH7P6QQ · Northstar Handy-Dockingstation aus Holz, Nachttisch-Organizer, Schreibtisch-Organizer für Ehemann, Geburtstagsgeschenke für Männer oder Vater, Idee für Jahrestag, Vatertagsgeschenk für Papa",
-        "reason": "Net profit впав на EUR 503; продано на 45 шт. менше",
+        "reason": "Net profit fell by EUR 503; sold 45 fewer units",
         "severity": "high",
         "impact": 503.41
       },
       {
         "title": "PP0005",
         "subtitle": "B08YJR9HDL · Northstar Handy Dockingstation & Schreibtisch Organizer Holz mit Handyständer Braun für Büro Aufbewahrung Organisation Schöne Männer Geschenke Geburtstag Herren Weihnachten Vatertagsgeschenk für Papa",
-        "reason": "Net profit впав на EUR 412; продано на 117 шт. менше",
+        "reason": "Net profit fell by EUR 412; sold 117 fewer units",
         "severity": "high",
         "impact": 412.02
       },
       {
         "title": "PP0006",
         "subtitle": "B08YJ5Y672 · Northstar Holz Telefon Dockingstation & Schreibtisch Organizer mit Handyständer Beige für Büro Aufbewahrung & Organisation Tolle Geschenkideen für Männer Holz Männer Väter",
-        "reason": "Net profit впав на EUR 378; продано на 61 шт. менше",
+        "reason": "Net profit fell by EUR 378; sold 61 fewer units",
         "severity": "high",
         "impact": 378.08
       },
       {
         "title": "Y4-OT79-ACBA",
         "subtitle": "B0B6WC5SST · Northstar Holz Gewehrhalter Wandhalterung, Wenge Hartholz, Wandhalterung 17x12x4,5 cm Kaffee - Waffenaufbewahrung & Ausstellung",
-        "reason": "Net profit впав на EUR 288; маржа просіла на 27,9 п.п.; продано на 34 шт. менше",
+        "reason": "Net profit fell by EUR 288; margin dropped by 27.9 pp; sold 34 fewer units",
         "severity": "high",
         "impact": 287.71
       },
       {
         "title": "BMP0011",
         "subtitle": "B0CP2KD382 · Northstar Wikinger krug für Bier 0,6 Liter | Bierkrug für Männer | Becher | Maßkrug | Bier Geschenk | Geschenkideen für Männer, Geschenk Vatertagsgeschenk für Papa",
-        "reason": "Net profit впав на EUR 269; маржа просіла на 8,1 п.п.; продано на 25 шт. менше",
+        "reason": "Net profit fell by EUR 269; margin dropped by 8.1 pp; sold 25 fewer units",
         "severity": "high",
         "impact": 269.45
       }
     ],
     "actions": [
-      "Перевірити SKU з найбільшим падінням Net profit і відокремити проблему попиту від проблеми маржі.",
-      "Для країн із просіданням прибутку порівняти зміну Sales, Units, Margin і PPC spend.",
-      "Для SKU, де продажі ростуть, а прибуток падає, перевірити fees, COGS, refunds, promo та ads."
+      "Review SKUs with the largest Net profit decline and separate demand issues from margin issues.",
+      "For countries with profit declines, compare Sales, Units, Margin, and PPC spend changes.",
+      "For SKUs where sales grow but profit falls, review fees, COGS, refunds, promotions, and ads."
     ],
     "evidence": [
-      "AI-блок не вигадує цифри: pandas спочатку знаходить зміни, падіння і конфлікти Sales vs Profit, а потім формує бізнес-коментар.",
-      "Для production-версії цей structured context можна передати в OpenAI API для більш природного тексту без зміни аналітичної логіки."
+      "The AI block does not invent numbers: pandas first identifies changes, drops, and Sales vs Profit conflicts, then forms business commentary.",
+      "For a production version, this structured context can be sent to an LLM API for more natural text without changing the analytics logic."
     ]
   },
   "source": {
@@ -1707,6 +1707,6 @@
       "PL_April_2026.csv",
       "PL_March_2026.csv"
     ],
-    "generatedAt": "2026-06-13T16:08:46.381867+00:00"
+    "generatedAt": "2026-06-13T16:32:45.528388+00:00"
   }
 }

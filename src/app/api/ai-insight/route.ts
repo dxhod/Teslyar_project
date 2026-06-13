@@ -143,13 +143,13 @@ export async function GET() {
           {
             role: "system",
             content:
-              "You are an Amazon marketplace business analyst. Answer in Ukrainian. Use only the supplied numbers. Do not invent metrics. Return valid JSON only."
+              "You are an Amazon marketplace business analyst. Answer in English. Use only the supplied numbers. Do not invent metrics. Return valid JSON only."
           },
           {
             role: "user",
             content: JSON.stringify({
               task:
-                "Create an executive interpretation for sales managers. Return schema: { headline: string, bullets: string[4], attention: [{ title, subtitle, reason, severity, impact }], actions: string[3-4], evidence: string[] }. The attention array must be chosen by you from productRiskCandidates. Pick 3-5 SKUs that deserve attention first. Prefer material profit impact, sharp margin deterioration, unit decline, or sales growth with profit decline. For each attention item, title must be SKU, subtitle must include ASIN and short product name, reason must be Ukrainian and cite exact supplied numbers, severity must be high|medium|low, impact should be a numeric priority. Keep actions practical and tied to supplied data.",
+                "Create an executive interpretation for sales managers. Return schema: { headline: string, bullets: string[4], attention: [{ title, subtitle, reason, severity, impact }], actions: string[3-4], evidence: string[] }. The attention array must be chosen by you from productRiskCandidates. Pick 3-5 SKUs that deserve attention first. Prefer material profit impact, sharp margin deterioration, unit decline, or sales growth with profit decline. For each attention item, title must be SKU, subtitle must include ASIN and short product name, reason must be English and cite exact supplied numbers, severity must be high|medium|low, impact should be a numeric priority. Keep actions practical and tied to supplied data.",
               data: context
             })
           }

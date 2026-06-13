@@ -6,7 +6,7 @@ import { buildQuestionContext } from "@/lib/qa-context";
 export const runtime = "nodejs";
 
 function isReportQuestion(question: string) {
-  return /(amazon|звіт|дан(і|их)|sku|asin|товар|продукт|країн|country|marketplace|sales|продаж|profit|прибут|margin|марж|ppc|ads|реклам|units|шт|refund|bsr|sessions|сес|march|берез|april|квіт|місяц|портфел|roi|acos|перевір|просів|падін|top|топ|найбільш|найкращ)/i.test(
+  return /(amazon|report|data|sku|asin|product|country|marketplace|market|sales|revenue|profit|margin|ppc|ads|advertising|units|refund|bsr|sessions|march|april|month|portfolio|roi|acos|check|watch|review|drop|decline|top|best|worst|largest|highest|lowest|risk|attention)/i.test(
     question
   );
 }
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   if (!isReportQuestion(normalizedQuestion)) {
     return NextResponse.json({
       answer:
-        "Я відповідаю тільки на питання по цьому Amazon-звіту: продажі, прибуток, маржа, країни, SKU, PPC, Units та зміни March vs April 2026.",
+        "I answer only questions about this Amazon report: sales, profit, margin, countries, SKUs, PPC, units, and March vs April 2026 changes.",
       provider: "guard"
     });
   }
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
           {
             role: "system",
             content:
-              "You are an Amazon marketplace data analyst. Answer in Ukrainian. Use only the provided post-pandas aggregated context. Answer the user's business question directly from the available metrics and helper lists. If the question asks which SKUs to check first, interpret it as risk prioritization and use biggestProfitDrops, biggestMarginDrops, biggestSalesDrops, sales deltas, units deltas and margin deltas as proxy signals. Do not say the data lacks a literal 'check first' field when risk/drop helper lists are present. If the question is about best-selling products, use Sales EUR by default and mention Units when useful. Only say the prepared data is insufficient when the requested field or relationship is truly absent from the context. Be concise, business-oriented, and include exact numbers where relevant."
+              "You are an Amazon marketplace data analyst. Answer in English. Use only the provided post-pandas aggregated context. Answer the user's business question directly from the available metrics and helper lists. If the question asks which SKUs to check first, interpret it as risk prioritization and use biggestProfitDrops, biggestMarginDrops, biggestSalesDrops, sales deltas, units deltas and margin deltas as proxy signals. Do not say the data lacks a literal 'check first' field when risk/drop helper lists are present. If the question is about best-selling products, use Sales EUR by default and mention Units when useful. Only say the prepared data is insufficient when the requested field or relationship is truly absent from the context. Be concise, business-oriented, and include exact numbers where relevant."
           },
           {
             role: "user",
